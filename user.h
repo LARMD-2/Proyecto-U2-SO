@@ -23,6 +23,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int trace(int);  // Función para activar/desactivar tracing de syscalls
 
 // ulib.c
 int stat(const char*, struct stat*);

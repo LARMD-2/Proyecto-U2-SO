@@ -7,6 +7,8 @@
 #include "mmu.h"
 #include "proc.h"
 
+extern int syscall_tracing;
+
 int
 sys_fork(void)
 {
@@ -88,4 +90,15 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+int
+sys_trace(void)
+{
+  int enable;
+
+  if(argint(0, &enable) < 0)
+    return -1;
+  syscall_tracing = enable;  // Activa (1) o desactiva (0) el tracing de syscalls
+  return 0;
 }

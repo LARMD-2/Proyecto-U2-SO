@@ -7,8 +7,11 @@
 #include "x86.h"
 #include "syscall.h"
 
+//variable para activar el trazado de syscalls
 int syscall_tracing = 0;
 
+
+// arreglo de nombres de syscalls para el trazado
 static char *syscall_names[] = {
   "",
   "fork", "exit", "wait", "pipe", "read", "kill", "exec",
@@ -113,6 +116,7 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
+extern int sys_trace(void);  // Nueva syscall para tracing
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -136,6 +140,7 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_trace]   sys_trace,  // Nueva syscall para tracing
 };
 
 void
@@ -145,6 +150,7 @@ syscall(void)
   struct proc *curproc = myproc();
 
   num = curproc->tf->eax;
+  // Si el trazado de syscalls está activado, imprimir el nombre de la syscall
   if(syscall_tracing && num > 0 && num < NELEM(syscall_names) && syscall_names[num]) {
     cprintf("syscall: %s\n", syscall_names[num]);
   }
