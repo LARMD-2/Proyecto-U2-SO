@@ -1,6 +1,13 @@
 struct stat;
 struct rtcdate;
 
+// Estructura para información de procesos
+struct proc_info {
+  int pid;
+  char name[16];
+  int state;  // 0=UNUSED, 1=EMBRYO, 2=SLEEPING, 3=RUNNABLE, 4=RUNNING, 5=ZOMBIE
+};
+
 // system calls
 int fork(void);
 int exit(void) __attribute__((noreturn));
@@ -24,6 +31,7 @@ char* sbrk(int);
 int sleep(int);
 int uptime(void);
 int trace(int);  // Función para activar/desactivar tracing de syscalls
+int getprocs(struct proc_info *buf, int max);  // Nueva syscall para obtener info de procesos
 
 // ulib.c
 int stat(const char*, struct stat*);

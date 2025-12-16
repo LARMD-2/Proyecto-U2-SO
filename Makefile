@@ -176,6 +176,7 @@ UPROGS=\
 	_ls\
 	_mkdir\
 	_rm\
+	_schedinfo\
 	_sh\
 	_stressfs\
 	_trace\
