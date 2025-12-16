@@ -9,6 +9,14 @@
 
 int syscall_tracing = 0;
 
+static char *syscall_names[] = {
+  "",
+  "fork", "exit", "wait", "pipe", "read", "kill", "exec",
+  "fstat", "chdir", "dup", "getpid", "sbrk", "sleep",
+  "uptime", "open", "write", "mknod", "unlink",
+  "link", "mkdir", "close"
+};
+
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
 // Arguments on the stack, from the user call to the C
