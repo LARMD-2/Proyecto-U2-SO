@@ -18,7 +18,7 @@ static char *syscall_names[] = {
   "fork", "exit", "wait", "pipe", "read", "kill", "exec",
   "fstat", "chdir", "dup", "getpid", "sbrk", "sleep",
   "uptime", "open", "write", "mknod", "unlink",
-  "link", "mkdir", "close"
+  "link", "mkdir", "close", "trace"
 };
 
 // User code makes a system call with INT T_SYSCALL.
