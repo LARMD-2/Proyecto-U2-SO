@@ -179,6 +179,7 @@ UPROGS=\
 	_sh\
 	_stressfs\
 	_trace\
+	_uptime\
 	_usertests\
 	_wc\
 	_zombie\
