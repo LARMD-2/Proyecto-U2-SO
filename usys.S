@@ -31,3 +31,4 @@ SYSCALL(sleep)
 SYSCALL(uptime)
 SYSCALL(trace)  // Enlace para la syscall de tracing
 SYSCALL(getprocs)  // Enlace para la syscall de obtener info de procesos
+SYSCALL(getcounts)  // Enlace para la syscall de obtener contadores de syscalls

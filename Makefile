@@ -180,6 +180,7 @@ UPROGS=\
 	_sh\
 	_stressfs\
 	_trace\
+	_count\
 	_uptime\
 	_usertests\
 	_wc\

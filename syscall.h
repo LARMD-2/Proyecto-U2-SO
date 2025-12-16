@@ -20,5 +20,6 @@
 #define SYS_link   19
 #define SYS_mkdir  20
 #define SYS_close  21
-#define SYS_trace  22  // Nueva syscall para activar/desactivar tracing de syscalls
-#define SYS_getprocs 23  // Nueva syscall para obtener información de procesos
+#define SYS_trace  22
+#define SYS_getcounts 23  // Nueva syscall para obtener contadores de syscalls
+#define SYS_getprocs 24  // Nueva syscall para obtener información de procesos
