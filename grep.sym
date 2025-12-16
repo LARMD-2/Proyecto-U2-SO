@@ -11,6 +11,7 @@
 000005b0 memmove
 000000c0 matchhere
 0000062b mknod
+00000683 trace
 000004c0 gets
 00000663 getpid
 000001f0 grep
