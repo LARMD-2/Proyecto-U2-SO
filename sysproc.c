@@ -8,7 +8,7 @@
 #include "proc.h"
 #include "spinlock.h"
 
-extern unsigned int syscall_counts[];
+extern int syscall_tracing;
 
 // Estructura de tabla de procesos (declarada en proc.c)
 extern struct {
@@ -114,18 +114,6 @@ sys_trace(void)
   if(argint(0, &enable) < 0)
     return -1;
   syscall_tracing = enable;  // Activa (1) o desactiva (0) el tracing de syscalls
-  return 0;
-}
-
-int
-sys_getcounts(void)
-{
-  unsigned int *counts;
-  int size = NELEM(syscalls) * sizeof(unsigned int);
-
-  if(argptr(0, (char**)&counts, size) < 0)
-    return -1;
-  memmove(counts, syscall_counts, size);  // Copiar contadores a user space
   return 0;
 }
 

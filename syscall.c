@@ -11,9 +11,6 @@
 //variable para activar el trazado de syscalls
 int syscall_tracing = 0;
 
-// Arreglo para contar invocaciones de cada syscall (indexado por número)
-unsigned int syscall_counts[NELEM(syscalls)] = {0};
-
 
 // arreglo de nombres de syscalls para el trazado
 static char *syscall_names[] = {
@@ -122,7 +119,6 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_trace(void);  // Nueva syscall para tracing
 extern int sys_getprocs(void);  // Nueva syscall para obtener info de procesos
-extern int sys_getcounts(void);  // Nueva syscall para contadores de syscalls
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
 [SYS_exit]    sys_exit,
@@ -147,7 +143,6 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_trace]   sys_trace,  // Nueva syscall para tracing
 [SYS_getprocs] sys_getprocs,  // Nueva syscall para obtener info de procesos
-[SYS_getcounts] sys_getcounts,  // Nueva syscall para obtener contadores de syscalls
 };
 
 void
@@ -319,7 +314,6 @@ syscall(void)
   }
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     curproc->tf->eax = syscalls[num]();
-    syscall_counts[num]++;  // Incrementar contador de la syscall
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             curproc->pid, curproc->name, num);
