@@ -7,8 +7,10 @@
 #include "mmu.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "syscall.h"
 
 extern int syscall_tracing;
+extern unsigned int syscall_counts[];
 
 // Estructura de tabla de procesos (declarada en proc.c)
 extern struct {
@@ -142,4 +144,16 @@ sys_getprocs(void)
   }
 
   return count;  // Retorna el número de procesos obtenidos
+}
+
+int
+sys_getcounts(void)
+{
+  unsigned int *counts;
+  int size = NSYSCALLS * sizeof(unsigned int);
+
+  if(argptr(0, (char**)&counts, size) < 0)
+    return -1;
+  memmove(counts, syscall_counts, size);  // Copiar contadores a user space
+  return 0;
 }

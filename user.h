@@ -32,6 +32,7 @@ int sleep(int);
 int uptime(void);
 int trace(int);  // Función para activar/desactivar tracing de syscalls
 int getprocs(struct proc_info *buf, int max);  // Nueva syscall para obtener info de procesos
+int getcounts(unsigned int *counts);  // Función para obtener contadores de syscalls
 
 // ulib.c
 int stat(const char*, struct stat*);
