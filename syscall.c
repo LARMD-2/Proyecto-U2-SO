@@ -6,6 +6,20 @@
 #include "proc.h"
 #include "x86.h"
 #include "syscall.h"
+#include "stat.h"
+
+//variable para activar el trazado de syscalls
+int syscall_tracing = 0;
+
+
+// arreglo de nombres de syscalls para el trazado
+static char *syscall_names[] = {
+  "",
+  "fork", "exit", "wait", "pipe", "read", "kill", "exec",
+  "fstat", "chdir", "dup", "getpid", "sbrk", "sleep",
+  "uptime", "open", "write", "mknod", "unlink",
+  "link", "mkdir", "close", "trace", "getprocs", "getcounts"
+};
 
 // User code makes a system call with INT T_SYSCALL.
 // System call number in %eax.
@@ -103,7 +117,9 @@ extern int sys_unlink(void);
 extern int sys_wait(void);
 extern int sys_write(void);
 extern int sys_uptime(void);
-
+extern int sys_trace(void);  // Nueva syscall para tracing
+extern int sys_getprocs(void);  // Nueva syscall para obtener info de procesos
+extern int sys_getcounts(void);  // Nueva syscall para obtener contadores de syscalls
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
 [SYS_exit]    sys_exit,
@@ -126,7 +142,13 @@ static int (*syscalls[])(void) = {
 [SYS_link]    sys_link,
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
+[SYS_trace]   sys_trace,  // Nueva syscall para tracing
+[SYS_getprocs] sys_getprocs,  // Nueva syscall para obtener info de procesos
+[SYS_getcounts] sys_getcounts,  // Nueva syscall para obtener contadores de syscalls
 };
+
+// Arreglo para contar invocaciones de cada syscall (indexado por número)
+unsigned int syscall_counts[NSYSCALLS] = {0};
 
 void
 syscall(void)
@@ -135,8 +157,169 @@ syscall(void)
   struct proc *curproc = myproc();
 
   num = curproc->tf->eax;
-  if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+  // Si el trazado de syscalls está activado, imprimir el nombre de la syscall
+  if(syscall_tracing && num > 0 && num < NELEM(syscall_names) && syscall_names[num]) {
+    cprintf("syscall: %s", syscall_names[num]);
+    switch(num){
+      case SYS_fork:
+        // 0 parámetros
+        break;
+      case SYS_exit:
+        {
+          int status;
+          if(argint(0, &status) >= 0)
+            cprintf("(%d)", status);
+        }
+        break;
+      case SYS_wait:
+        // 0 parámetros
+        break;
+      case SYS_pipe:
+        {
+          int *p;
+          if(argptr(0, (char**)&p, sizeof(int)*2) >= 0)
+            cprintf("(%p)", p);
+        }
+        break;
+      case SYS_read:
+        {
+          int fd, n;
+          char *buf;
+          if(argint(0, &fd) >= 0 && argptr(1, &buf, 1) >= 0 && argint(2, &n) >= 0)
+            cprintf("(%d, %p, %d)", fd, buf, n);
+        }
+        break;
+      case SYS_kill:
+        {
+          int pid;
+          if(argint(0, &pid) >= 0)
+            cprintf("(%d)", pid);
+        }
+        break;
+      case SYS_exec:
+        {
+          char *path, *argv;
+          if(argstr(0, &path) >= 0 && argptr(1, &argv, 1) >= 0)
+            cprintf("(\"%s\", %p)", path, argv);
+        }
+        break;
+      case SYS_fstat:
+        {
+          int fd;
+          struct stat *st;
+          if(argint(0, &fd) >= 0 && argptr(1, (char**)&st, sizeof(*st)) >= 0)
+            cprintf("(%d, %p)", fd, st);
+        }
+        break;
+      case SYS_chdir:
+        {
+          char *path;
+          if(argstr(0, &path) >= 0)
+            cprintf("(\"%s\")", path);
+        }
+        break;
+      case SYS_dup:
+        {
+          int fd;
+          if(argint(0, &fd) >= 0)
+            cprintf("(%d)", fd);
+        }
+        break;
+      case SYS_getpid:
+        // 0 parámetros
+        break;
+      case SYS_sbrk:
+        {
+          int n;
+          if(argint(0, &n) >= 0)
+            cprintf("(%d)", n);
+        }
+        break;
+      case SYS_sleep:
+        {
+          int n;
+          if(argint(0, &n) >= 0)
+            cprintf("(%d)", n);
+        }
+        break;
+      case SYS_uptime:
+        // 0 parámetros
+        break;
+      case SYS_open:
+        {
+          char *path;
+          int omode;
+          if(argstr(0, &path) >= 0 && argint(1, &omode) >= 0)
+            cprintf("(\"%s\", %d)", path, omode);
+        }
+        break;
+      case SYS_write:
+        {
+          int fd, n;
+          char *buf;
+          if(argint(0, &fd) >= 0 && argptr(1, &buf, 1) >= 0 && argint(2, &n) >= 0)
+            cprintf("(%d, %p, %d)", fd, buf, n);
+        }
+        break;
+      case SYS_mknod:
+        {
+          char *path;
+          short major, minor;
+          if(argstr(0, &path) >= 0 && argint(1, (int*)&major) >= 0 && argint(2, (int*)&minor) >= 0)
+            cprintf("(\"%s\", %d, %d)", path, major, minor);
+        }
+        break;
+      case SYS_unlink:
+        {
+          char *path;
+          if(argstr(0, &path) >= 0)
+            cprintf("(\"%s\")", path);
+        }
+        break;
+      case SYS_link:
+        {
+          char *old, *new;
+          if(argstr(0, &old) >= 0 && argstr(1, &new) >= 0)
+            cprintf("(\"%s\", \"%s\")", old, new);
+        }
+        break;
+      case SYS_mkdir:
+        {
+          char *path;
+          if(argstr(0, &path) >= 0)
+            cprintf("(\"%s\")", path);
+        }
+        break;
+      case SYS_close:
+        {
+          int fd;
+          if(argint(0, &fd) >= 0)
+            cprintf("(%d)", fd);
+        }
+        break;
+      case SYS_trace:
+        {
+          int enable;
+          if(argint(0, &enable) >= 0)
+            cprintf("(%d)", enable);
+        }
+        break;
+      case SYS_getprocs:
+        {
+          int max;
+          if(argint(1, &max) >= 0)
+            cprintf("(..., %d)", max);
+        }
+        break;
+      default:
+        // Para syscalls no manejadas, no imprimir params
+        break;
+    }
+    cprintf("\n");
+  }
+  if(num > 0 && num < NSYSCALLS && syscalls[num]) {
     curproc->tf->eax = syscalls[num]();
+    syscall_counts[num]++;  // Incrementar contador de la syscall
   } else {
     cprintf("%d %s: unknown sys call %d\n",
             curproc->pid, curproc->name, num);
